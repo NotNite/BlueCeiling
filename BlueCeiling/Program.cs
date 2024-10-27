@@ -47,5 +47,5 @@ public partial class Program {
         return (r, g, b);
     }
 
-    [GeneratedRegex(@"#([A-Fa-f0-9]{6})")] private static partial Regex HexColorRegex();
+    [GeneratedRegex(@"#([A-Fa-f0-9]{6})(?:\s|$)")] private static partial Regex HexColorRegex();
 }
