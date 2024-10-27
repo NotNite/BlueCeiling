@@ -11,7 +11,7 @@ public partial class Program {
     private static ATJetStream JetStream = new ATJetStreamBuilder().Build();
     private static HttpClient HttpClient = new HttpClient();
 
-    public static async Task Main(string[] args) {
+    public static async Task Main() {
         JetStream.OnRecordReceived += OnRecordReceived;
         await JetStream.ConnectAsync();
         await Task.Delay(-1);
@@ -21,17 +21,20 @@ public partial class Program {
         try {
             if (args.Record?.Commit?.Record is not Post post) return;
             if (post.Text is null) return;
-            Process(post.Text);
+            Process(post.Text, post.CreatedAt);
         } catch {
             // ignored
         }
     }
 
-    private static void Process(string text) {
+    private static void Process(string text, DateTime? createdAt = null) {
         var match = HexColorRegex().Match(text);
         if (match.Success) {
             var (r, g, b) = HexToRgb(match.Value);
-            Console.WriteLine($"Firing {r:X2}{g:X2}{b:X2}");
+            var msAgo = createdAt is not null
+                            ? (DateTime.UtcNow - createdAt.Value).TotalMilliseconds
+                            : 0;
+            Console.WriteLine($"Firing {r:X2}{g:X2}{b:X2} (message age was {msAgo}ms)");
             Task.Run(() => Fire(r, g, b));
         }
     }
@@ -47,5 +50,6 @@ public partial class Program {
         return (r, g, b);
     }
 
-    [GeneratedRegex(@"#([A-Fa-f0-9]{6})(?:\s|$)")] private static partial Regex HexColorRegex();
+    [GeneratedRegex(@"#([A-Fa-f0-9]{6})(?:\s|$)")]
+    private static partial Regex HexColorRegex();
 }

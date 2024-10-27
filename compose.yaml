@@ -1,0 +1,4 @@
+services:
+  blueceiling:
+    build:
+      context: .

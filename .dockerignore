@@ -1,0 +1,14 @@
+**/.git/
+**/.idea/
+**/.vs/
+**/bin/
+**/obj/
+**/out/
+
+# files
+LICENSE
+Dockerfile*
+**/*.md
+**/*.user
+**/*.gitignore
+**/*.editorconfig
