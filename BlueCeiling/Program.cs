@@ -1,4 +1,5 @@
 ﻿using System.Globalization;
+using System.Net.WebSockets;
 using System.Text.RegularExpressions;
 using FishyFlip;
 using FishyFlip.Events;
@@ -9,12 +10,20 @@ namespace BlueCeiling;
 public partial class Program {
     private const string LightUrl = "https://soulja-boy-told.me/light";
     private static ATJetStream JetStream = new ATJetStreamBuilder().Build();
-    private static HttpClient HttpClient = new HttpClient();
+    private static HttpClient HttpClient = new();
 
     public static async Task Main() {
         JetStream.OnRecordReceived += OnRecordReceived;
+        JetStream.OnConnectionUpdated += OnConnectionUpdated;
         await JetStream.ConnectAsync();
         await Task.Delay(-1);
+    }
+
+    private static void OnConnectionUpdated(object? _, SubscriptionConnectionStatusEventArgs args) {
+        if (args.State is WebSocketState.Closed or WebSocketState.Aborted or WebSocketState.None) {
+            Console.WriteLine("got ratio'd, reconnecting");
+            Task.Run(() => JetStream.ConnectAsync());
+        }
     }
 
     private static void OnRecordReceived(object? _, JetStreamATWebSocketRecordEventArgs args) {
